@@ -1,8 +1,11 @@
 name: Latest SQLAlchemy
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *'
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
 jobs:
   postgres:
     name: Test latest sqlalchemy with postgres
@@ -50,3 +53,55 @@ jobs:
           status: ${{ job.status }}
           channel: '#notifications-builds'
         if: always()
+
+  runs-on:
+    name: Test latest sqlalchemy with postgres_arm64
+    strategy:
+      matrix:
+        python-version: ["3.8"]  
+      fail-fast: false  
+    runs-on: ubuntu-latest
+    env:
+          POSTGRES_DB: test_ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: setup qemu
+        id: qemu
+        uses: docker/setup-qemu-action@v1   
+        
+      - name: Install dependencies including latest sqlalchemy version
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+          arm64v8/ubuntu \
+          bash -exc 'apt-get update && \
+          apt-get install -y sudo && \
+          apt install software-properties-common -y && \
+          sudo add-apt-repository ppa:deadsnakes/ppa -y && \
+          apt install -y python${{ matrix.python-version }} && \
+          apt install -y python${{ matrix.python-version }}-venv && \
+          python${{ matrix.python-version }} -m venv .env && \
+          source .env/bin/activate && \
+          apt-get install -y python3-dev && \
+          uname -m && \
+          python -m pip install --upgrade pip setuptools wheel && \
+          apt-get install -y postgresql postgresql-contrib && \
+          whereis postgresql && \
+          service postgresql start && \
+          apt install -y unixodbc-dev && \
+          apt-get install -y libpq-dev && \
+          apt-get install -y g++ && \
+          pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt -c constraints-dev.txt && \
+          pip install . && \
+          pip install --requirement requirements.txt -c constraints-dev.txt && \
+          pip install --upgrade SQLAlchemy && \
+          apt-get install -y language-pack-en && \
+          export LC_CTYPE=en_US.UTF-8 && \
+          pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
+          deactivate'
