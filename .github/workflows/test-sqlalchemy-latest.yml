@@ -103,5 +103,5 @@ jobs:
           pip install --upgrade SQLAlchemy && \
           apt-get install -y language-pack-en && \
           export LC_CTYPE=en_US.UTF-8 && \
-          pytest --no-postgres --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
+          pytest --no-spark --no-postgres --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
           deactivate'
