@@ -46,7 +46,7 @@ jobs:
           pip install --upgrade SQLAlchemy
       - name: Test with pytest
         run: |
-          pytest --no-spark --no-sqlalchemy --no-postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics
       - name: Notify via Slack
         uses: act10ns/slack@v1
         with:
@@ -91,9 +91,9 @@ jobs:
           apt-get install -y python3-dev && \
           uname -m && \
           python -m pip install --upgrade pip setuptools wheel && \
-          #apt-get install -y postgresql postgresql-contrib && \
-          #whereis postgresql && \
-          #service postgresql start && \
+          apt-get install -y postgresql postgresql-contrib && \
+          whereis postgresql && \
+          service postgresql start && \
           apt install -y unixodbc-dev && \
           apt-get install -y libpq-dev && \
           apt-get install -y g++ && \
@@ -103,5 +103,5 @@ jobs:
           pip install --upgrade SQLAlchemy && \
           apt-get install -y language-pack-en && \
           export LC_CTYPE=en_US.UTF-8 && \
-          pytest --no-spark --no-sqlalchemy --no-postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
+          pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
           deactivate'
