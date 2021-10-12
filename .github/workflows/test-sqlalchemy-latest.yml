@@ -46,7 +46,7 @@ jobs:
           pip install --upgrade SQLAlchemy
       - name: Test with pytest
         run: |
-          pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          pytest --no-spark --no-sqlalchemy --no-postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics
       - name: Notify via Slack
         uses: act10ns/slack@v1
         with:
@@ -103,5 +103,5 @@ jobs:
           pip install --upgrade SQLAlchemy && \
           apt-get install -y language-pack-en && \
           export LC_CTYPE=en_US.UTF-8 && \
-          pytest --no-spark --no-sqlalchemy --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
+          pytest --no-spark --no-sqlalchemy --no-postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics && \
           deactivate'
